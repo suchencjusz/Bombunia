@@ -1,12 +1,13 @@
-#from selenium import webdriver
 import json
-import time 
-from seleniumwire import webdriver
+import time
+from selenium import webdriver
 
 def catch():
     with open('config.json') as f: config = json.load(f)
 
     driver = webdriver.Firefox()
+    # driver.set_window_size(1120, 550)
+
     driver.set_page_load_timeout(30)
     driver.get(config['school_url'])
 
@@ -28,7 +29,7 @@ def catch():
     button = driver.find_element_by_xpath("/html[1]/body[1]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[8]/button[1]")
     button.click()
 
-    time.sleep(3)
+    time.sleep(5)
 
     cookies = driver.get_cookies()
 

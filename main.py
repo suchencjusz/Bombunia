@@ -6,7 +6,7 @@ with open('config.json') as f:
     config = json.load(f)
 
 parsedCookies = ""
-subjectToSave = []
+AllGrades = []
 additional_cookie_data = " idBiezacyUczen=4168; idBiezacyDziennik=1485; idBiezacyDziennikPrzedszkole=0; idBiezacyDziennikWychowankowie=0"
 url = 'https://uonetplus-uczen.vulcan.net.pl/powiatchrzanowski/009583/Statystyki.mvc/GetOcenyCzastkowe'
 payload = {
@@ -35,15 +35,17 @@ headers = {
     'Sec-GPC': '1'
 }
 
+
 def getCookies():
-    parsedCookies, cookieJsonData = "", ""
+    pdCookies, cookieJsonData = "", ""
     with open('cookies.json') as f:
         cookieJsonData = json.load(f)
     for idx, i in enumerate(cookieJsonData):
-        parsedCookies = parsedCookies + i['name']+"="+i['value']
+        pdCookies = pdCookies + i['name']+"="+i['value']
         if idx != len(cookieJsonData)-1:
-            parsedCookies = parsedCookies + "; "
-    return parsedCookies
+            pdCookies = pdCookies + "; "
+    return pdCookies
+
 
 def MuchiosAmogisGrades(subject):
     sum = 0
@@ -51,27 +53,42 @@ def MuchiosAmogisGrades(subject):
         sum = sum+i['Value']
     return sum
 
+def LoadCookie():
+    try:
+        parsedCookies = getCookies()
+    except:
+        ciasteczko.catch()
+        parsedCookies = getCookies()
+
 def CookieCheck():
     limiter = 0
     rn = requests.post(url, data=json.dumps(payload), headers=headers)
     while rn.status_code != 200 and limiter < 4:
+        print(rn.status_code, " <code of vulcan request")
         ciasteczko.flush()
         ciasteczko.catch()
-        rn = requests.post(url, data=json.dumps(payload), headers=headers)  # grades request
-        limiter = limiter + 5
+        LoadCookie()
+        rn = requests.post(url, data=json.dumps(payload),
+                           headers=headers)  # grades request
+        limiter = limiter + 1
 
-    if limiter > 3:
+    if limiter > 3:  # raz dziala, raz nie tak jak wyzej czy tam nizej z try catch
         print("Limiter loop exceeded")
-        CookieCheck() 
+        CookieCheck()
         limiter = 0
 
     return rn
 
-try:
-    parsedCookies = getCookies()
-except:
-    ciasteczko.catch()
-    parsedCookies = getCookies()
+
+def GradesToList(subject):
+    grades_return = []
+    for i in range(0, 6, 1):
+        grades_return.append(
+            int(subject['ClassSeries']['Items'][5-i]['Value']))
+    return grades_return
+
+
+LoadCookie()
 
 headers['Cookie'] = parsedCookies + additional_cookie_data
 
@@ -79,7 +96,7 @@ r = CookieCheck()
 
 try:
     dzejson = r.json()
-    print("dlugosc json",len(str(dzejson)))
+    print("dlugosc json", len(str(dzejson)))
     if len(str(dzejson)) < 500:
         print("chuj")
         ciasteczko.catch()
@@ -93,12 +110,10 @@ for subject in dzejson['data']:
     print(subject['Subject'], "- Brak ocen\n\n") if subject['TableContent'] == None else print(
         subject['Subject'], '-', MuchiosAmogisGrades(subject))
     if subject['TableContent'] != None:
+        AllGrades.append(
+            {'subject_name': subject['Subject'], 'grades': GradesToList(subject)})
+
         for idx, label in enumerate(subject['ClassSeries']['Items']):
-            # TO OD TYCH KLAS NIE WIEM JAK TO DZIALA W TYM PYTHONIE :/
-            #sbj = Subject(x,y)
-            # sbj.subject_name=subject['Subject']
-           # sbj.grades[idx]=int(label['Value'])
-           # subjectToSave.append(sbj)
             sumOfAllGrades = sumOfAllGrades+(int(label['Value'])*(6-idx))
             muchOfAllGrades = muchOfAllGrades+label['Value']
             print("Ocen \'"+str(6 - idx)+"\':", label['Value'], end="\n")
@@ -107,13 +122,5 @@ for subject in dzejson['data']:
 print(round(sumOfAllGrades/muchOfAllGrades, 2),
       "uwaga średnia klasy nie uwzględnia wag!")
 
-# subjects = [subject['Subject'] for subject in dzejson['data']]
-
-# CHECKING CZY KLASA DZIALA XDXD
-# for i in subjectToSave:
-#     print(i.subject_name)
-
-
-# encoding GeeksforGeeks using md5 hash
-# function
-#result = hashlib.md5(b'GeeksforGeeks')
+for i in AllGrades:
+    print(i)
