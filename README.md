@@ -14,6 +14,10 @@ Projekt ciągle rozwijany, aktualnie jego kod jest co najmniej *żenujący*
 - [ ] Stworzenie systemu zapisu ocen i porównywania ich (tak jak w [Bombeczka](https://github.com/suchencjusz/Bombeczka)).
   - [x] Już się zapisują (prawie)
 
+# Projekt otwarty na kontrybucje
+
+Wystarczy zrobić forka repozytorium i stworzyć pull requesta C:
+
 # Instalacja
 
 ```
