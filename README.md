@@ -7,12 +7,12 @@ wysyła je na serwer discord
 Projekt ciągle rozwijany, aktualnie jego kod jest co najmniej *żenujący*
 
 ## TODO:
-- [ ] Ogarnięcie samego działania programu (działa jakby chciał a nie mógł),
-- [ ] Łapanie błędów json'a (chodzi o sprwadzenie pliku ```cookies.json```),
+- [x] Ogarnięcie samego działania programu (działa jakby chciał a nie mógł),
 - [ ] Stworzenie pliku konfiguracyjnego ```setup.py```,
 - [ ] Webhooki discorda,
-- [ ] Ogarnięcie nazw funkcji i zmiennych, takich jak ```MuchiosAmogisGrades``` lub ```dupa```,
+- [x] Ogarnięcie nazw funkcji i zmiennych, takich jak ```MuchiosAmogisGrades``` lub ```dupa```,
 - [ ] Stworzenie systemu zapisu ocen i porównywania ich (tak jak w [Bombeczka](https://github.com/suchencjusz/Bombeczka)).
+  - [x] Już się zapisują (prawie)
 
 # Instalacja
 
