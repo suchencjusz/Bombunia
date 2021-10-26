@@ -2,12 +2,13 @@ import requests
 import json
 import tiramisu_getter as ciasteczko
 import datetime
+import time
 import os
 
 with open('config.json') as f:
     config = json.load(f)
     f.close()
-
+    
 grades_path = "grades/"
 parsedCookies = ""
 AllGrades = []
@@ -77,6 +78,7 @@ def CookieCheckONLY():
 
 
 def GettingCookiesToWORK():
+    temp_limiter=0
     if CookieCheckONLY() != 200:
         try:  # znowu syf
             OpenCookies()
@@ -84,6 +86,9 @@ def GettingCookiesToWORK():
             ciasteczko.flush()
             ciasteczko.catch()
     else:
+        print("Trying again in",(temp_limiter*5),"seconds")
+        time.sleep(temp_limiter*5)
+        temp_limiter=temp_limiter+1
         ciasteczko.flush()
         ciasteczko.catch()
         GettingCookiesToWORK()
