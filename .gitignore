@@ -140,7 +140,7 @@ cython_debug/
 # Secrets 
 config.json
 cookies.json
+grades/
 
 # EXE
-
 *.exe

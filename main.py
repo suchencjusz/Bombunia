@@ -1,10 +1,14 @@
 import requests
 import json
 import tiramisu_getter as ciasteczko
+import datetime
+import os
 
 with open('config.json') as f:
     config = json.load(f)
+    f.close()
 
+grades_path = "grades/"
 parsedCookies = ""
 AllGrades = []
 additional_cookie_data = " idBiezacyUczen=4168; idBiezacyDziennik=1485; idBiezacyDziennikPrzedszkole=0; idBiezacyDziennikWychowankowie=0"
@@ -36,48 +40,11 @@ headers = {
 }
 
 
-def getCookies():
-    pdCookies, cookieJsonData = "", ""
-    with open('cookies.json') as f:
-        cookieJsonData = json.load(f)
-    for idx, i in enumerate(cookieJsonData):
-        pdCookies = pdCookies + i['name']+"="+i['value']
-        if idx != len(cookieJsonData)-1:
-            pdCookies = pdCookies + "; "
-    return pdCookies
-
-
 def MuchiosAmogisGrades(subject):
     sum = 0
     for i in subject['ClassSeries']['Items']:
         sum = sum+i['Value']
     return sum
-
-def LoadCookie():
-    try:
-        parsedCookies = getCookies()
-    except:
-        ciasteczko.catch()
-        parsedCookies = getCookies()
-
-def CookieCheck():
-    limiter = 0
-    rn = requests.post(url, data=json.dumps(payload), headers=headers)
-    while rn.status_code != 200 and limiter < 4:
-        print(rn.status_code, " <code of vulcan request")
-        ciasteczko.flush()
-        ciasteczko.catch()
-        LoadCookie()
-        rn = requests.post(url, data=json.dumps(payload),
-                           headers=headers)  # grades request
-        limiter = limiter + 1
-
-    if limiter > 3:  # raz dziala, raz nie tak jak wyzej czy tam nizej z try catch
-        print("Limiter loop exceeded")
-        CookieCheck()
-        limiter = 0
-
-    return rn
 
 
 def GradesToList(subject):
@@ -88,11 +55,44 @@ def GradesToList(subject):
     return grades_return
 
 
-LoadCookie()
+def OpenCookies():
+    pdCookies, cookieJsonData = "", ""
+    if os.path.isfile('cookies.json') and os.path.getsize('cookies.json') != 0:
+        with open('cookies.json') as f:
+            cookieJsonData = json.load(f)
+        for idx, i in enumerate(cookieJsonData):
+            pdCookies = pdCookies + i['name']+"="+i['value']
+            if idx != len(cookieJsonData)-1:
+                pdCookies = pdCookies + "; "
+        headers['Cookie'] = pdCookies + additional_cookie_data
+    else:
+        ciasteczko.flush()
+        ciasteczko.catch()
 
-headers['Cookie'] = parsedCookies + additional_cookie_data
 
-r = CookieCheck()
+def CookieCheckONLY():
+    OpenCookies()
+    rn = requests.post(url, data=json.dumps(payload), headers=headers)
+    return rn.status_code
+
+
+def GettingCookiesToWORK():
+    if CookieCheckONLY() != 200:
+        try:  # znowu syf
+            OpenCookies()
+        except:
+            ciasteczko.flush()
+            ciasteczko.catch()
+    else:
+        ciasteczko.flush()
+        ciasteczko.catch()
+        GettingCookiesToWORK()
+
+
+GettingCookiesToWORK()
+OpenCookies()
+
+r = requests.post(url, data=json.dumps(payload), headers=headers)
 
 try:
     dzejson = r.json()
@@ -101,10 +101,12 @@ try:
         print("chuj")
         ciasteczko.catch()
 except:
-    ciasteczko.catch()
+    ciasteczko.catch()  # ? cos tu nie dziala
 
 sumOfAllGrades = 0
 muchOfAllGrades = 0
+
+print(dzejson['data'])
 
 for subject in dzejson['data']:
     print(subject['Subject'], "- Brak ocen\n\n") if subject['TableContent'] == None else print(
@@ -119,8 +121,18 @@ for subject in dzejson['data']:
             print("Ocen \'"+str(6 - idx)+"\':", label['Value'], end="\n")
             print("\n") if idx == 5 else None
 
-print(round(sumOfAllGrades/muchOfAllGrades, 2),
+print(round(sumOfAllGrades/muchOfAllGrades, 5),
       "uwaga średnia klasy nie uwzględnia wag!")
 
-for i in AllGrades:
-    print(i)
+dt = datetime.datetime.now()
+
+AllGradesFinal = []
+AllGradesFinal.append({'time': str(dt.isoformat()),
+                       'sumOfAllGrades': sumOfAllGrades,
+                       'muchOfAllGrades': muchOfAllGrades,
+                       'grades': AllGrades}
+                      )
+
+with open(f'{grades_path}t.json', "w") as f:
+    json.dump(AllGradesFinal, f)
+    f.close()

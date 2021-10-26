@@ -12,3 +12,4 @@ result = {'email': email,
 
 with open('config.json', "w") as f:
     json.dump(result, f)
+    f.close()
