@@ -8,7 +8,7 @@ import os
 with open('config.json') as f:
     config = json.load(f)
     f.close()
-    
+
 grades_path = "grades/"
 parsedCookies = ""
 AllGrades = []
@@ -78,9 +78,9 @@ def CookieCheckONLY():
 
 
 def GettingCookiesToWORK():
-    temp_limiter=0
-    if CookieCheckONLY() != 200:
-        try:  # znowu syf
+    temp_limiter=1
+    if CookieCheckONLY() == 200:
+        try:
             OpenCookies()
         except:
             ciasteczko.flush()
@@ -106,7 +106,7 @@ try:
         print("chuj")
         ciasteczko.catch()
 except:
-    ciasteczko.catch()  # ? cos tu nie dziala
+    ciasteczko.catch()
 
 sumOfAllGrades = 0
 muchOfAllGrades = 0
