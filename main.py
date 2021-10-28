@@ -9,6 +9,7 @@ with open('config.json') as f:
     config = json.load(f)
     f.close()
 
+debuginfo=""
 grades_path = "grades/"
 parsedCookies = ""
 AllGrades = []
@@ -78,7 +79,7 @@ def CookieCheckONLY():
 
 
 def GettingCookiesToWORK():
-    temp_limiter=1
+    temp_limiter = 1
     if CookieCheckONLY() == 200:
         try:
             OpenCookies()
@@ -86,13 +87,22 @@ def GettingCookiesToWORK():
             ciasteczko.flush()
             ciasteczko.catch()
     else:
-        print("Trying again in",(temp_limiter*5),"seconds")
+        print("Trying again in", (temp_limiter*5), "seconds")
         time.sleep(temp_limiter*5)
-        temp_limiter=temp_limiter+1
+        temp_limiter = temp_limiter+1
         ciasteczko.flush()
         ciasteczko.catch()
         GettingCookiesToWORK()
 
+def MuchPalas(paly):
+    if paly == 0:
+        return "(cud) wpadło ich aż **0** :o"
+    if paly < 5 and paly != 0:
+        return "Tylko tyle??? wpadło ich: **" + str(paly) + "**"
+    if paly >= 5 and paly <= 12:
+        return "No mogło wpaść więcej, wpadło ich: **" + str(paly) + "**"
+    if paly > 12:
+        return "Ale z nas to są debile jebane jednak XDDDdd wpadło ich: **" + str(paly) + "**"
 
 GettingCookiesToWORK()
 OpenCookies()
@@ -105,8 +115,11 @@ try:
     if len(str(dzejson)) < 500:
         print("chuj")
         ciasteczko.catch()
+        r = requests.post(url, data=json.dumps(payload),
+                          headers=headers)  # guwno nie dziala
 except:
     ciasteczko.catch()
+    r = requests.post(url, data=json.dumps(payload), headers=headers)
 
 sumOfAllGrades = 0
 muchOfAllGrades = 0
@@ -132,12 +145,111 @@ print(round(sumOfAllGrades/muchOfAllGrades, 5),
 dt = datetime.datetime.now()
 
 AllGradesFinal = []
-AllGradesFinal.append({'time': str(dt.isoformat()),
+AllGradesToCompare = []
+AllGradesFinal.append({'time': dt.timestamp(),
                        'sumOfAllGrades': sumOfAllGrades,
                        'muchOfAllGrades': muchOfAllGrades,
-                       'grades': AllGrades}
+                       'allGrades': AllGrades}
                       )
 
-with open(f'{grades_path}t.json', "w") as f:
+list = os.listdir(grades_path)
+number_files = len(list)
+
+if number_files > 0:
+    with open(grades_path + str(number_files) + '.json') as f:
+        AllGradesToCompare = json.load(f)
+        f.close()
+else:
+    with open(grades_path + str(number_files+1) + '.json', "w") as f:
+        json.dump(AllGradesFinal, f)
+        f.close()
+
+changes = False
+
+comparinga = []
+comparingb = []
+
+for toCmpr in AllGradesToCompare[0]['allGrades']:
+    if toCmpr not in AllGradesFinal[0]['allGrades']:
+        print("no ta", toCmpr)
+        changes = True
+        comparinga.append(toCmpr)
+
+if changes == False:
+    quit()
+
+with open(grades_path + str(number_files+1) + '.json', "w") as f:
     json.dump(AllGradesFinal, f)
     f.close()
+
+print("xd")
+
+for toCmpr in AllGradesFinal[0]['allGrades']:
+    if toCmpr not in AllGradesToCompare[0]['allGrades']:
+        print("no ta", toCmpr)
+        comparingb.append(toCmpr)
+
+if len(comparinga) != len(comparingb):
+    print("comprainga != compraingb wtf?")
+    quit()
+
+
+newgrades = []
+
+for i in range(len(comparinga)):
+    tempciak = [None]*6
+    for c in range(6):
+        tempciak[c] = abs(int(comparinga[i]['grades'][c]) - int(comparingb[i]['grades'][c]))
+    newgrades.append({'subject_name': comparinga[i]['subject_name'],
+                      'grades': tempciak}
+                     )
+
+toDiscordWebhook=""
+wiadomoscMotywacyjna=""
+
+sumOfPalas=0
+
+for idx,i in enumerate(newgrades):
+    toDiscordWebhook=toDiscordWebhook+i['subject_name']+":\n"
+    for idy,y in enumerate(i['grades']):
+        if idy == 0:
+            sumOfPalas=sumOfPalas+y
+        toDiscordWebhook=toDiscordWebhook+str(idy+1)+": "+str(y)+" \n"
+    toDiscordWebhook=toDiscordWebhook+"\n"
+
+wiadomoscMotywacyjna = "**Ile dzisiaj wpadło pał?** \n" + MuchPalas(sumOfPalas)
+
+print(toDiscordWebhook)
+
+#time_checked = datetime.fromtimestamp(AllGradesToCompare[0]['time'])
+
+#refaktoryzacja ma wleciec bo to sa jaja jakies
+average=""
+if round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5)<round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5):
+    average = "Nasza średnia spadła z "+str(round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5))+" do "+str(round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5))+" xddd"
+else:
+    average = "Nasza średnia wzrosła z "+str(round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5))+" do "+str(round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5))
+
+url = config['discord_webhook']
+
+#for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
+data = {
+    "username" : "Bombunia"
+}
+
+#for all params, see https://discordapp.com/developers/docs/resources/channel#embed-object
+data["embeds"] = [
+    {
+        "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n",
+        "title" : "Bombunia"
+    }
+] 
+
+result = requests.post(url, json = data)
+
+try:
+    result.raise_for_status()
+except requests.exceptions.HTTPError as err:
+    print(err)
+else:
+    print("Payload delivered successfully, code {}.".format(result.status_code))
