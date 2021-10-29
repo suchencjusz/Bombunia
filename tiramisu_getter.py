@@ -39,6 +39,7 @@ def catch():
     
     with open("cookies.json", "w") as f: 
         json.dump(cookies,f)
+        f.close()
 
     driver.close()
 

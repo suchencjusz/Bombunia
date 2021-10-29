@@ -42,7 +42,7 @@ headers = {
 }
 
 
-def MuchiosAmogisGrades(subject):
+def HowMuchGrades(subject):
     sum = 0
     for i in subject['ClassSeries']['Items']:
         sum = sum+i['Value']
@@ -116,7 +116,7 @@ try:
         print("chuj")
         ciasteczko.catch()
         r = requests.post(url, data=json.dumps(payload),
-                          headers=headers)  # guwno nie dziala
+                          headers=headers) 
 except:
     ciasteczko.catch()
     r = requests.post(url, data=json.dumps(payload), headers=headers)
@@ -128,7 +128,7 @@ print(dzejson['data'])
 
 for subject in dzejson['data']:
     print(subject['Subject'], "- Brak ocen\n\n") if subject['TableContent'] == None else print(
-        subject['Subject'], '-', MuchiosAmogisGrades(subject))
+        subject['Subject'], '-', HowMuchGrades(subject))
     if subject['TableContent'] != None:
         AllGrades.append(
             {'subject_name': subject['Subject'], 'grades': GradesToList(subject)})
@@ -171,7 +171,6 @@ comparingb = []
 
 for toCmpr in AllGradesToCompare[0]['allGrades']:
     if toCmpr not in AllGradesFinal[0]['allGrades']:
-        print("no ta", toCmpr)
         changes = True
         comparinga.append(toCmpr)
 
@@ -182,17 +181,13 @@ with open(grades_path + str(number_files+1) + '.json', "w") as f:
     json.dump(AllGradesFinal, f)
     f.close()
 
-print("xd")
-
 for toCmpr in AllGradesFinal[0]['allGrades']:
     if toCmpr not in AllGradesToCompare[0]['allGrades']:
-        print("no ta", toCmpr)
         comparingb.append(toCmpr)
 
 if len(comparinga) != len(comparingb):
     print("comprainga != compraingb wtf?")
     quit()
-
 
 newgrades = []
 
@@ -223,12 +218,17 @@ print(toDiscordWebhook)
 
 #time_checked = datetime.fromtimestamp(AllGradesToCompare[0]['time'])
 
-#refaktoryzacja ma wleciec bo to sa jaja jakies
 average=""
-if round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5)<round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5):
-    average = "Nasza średnia spadła z "+str(round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5))+" do "+str(round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5))+" xddd"
+
+averageOld=round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5)
+averageNew=round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5)
+
+if averageOld<averageNew:
+    average = "Nasza średnia wzrosła z "+str(averageOld)+" do "+str(averageNew)
 else:
-    average = "Nasza średnia wzrosła z "+str(round(AllGradesFinal[0]['sumOfAllGrades']/AllGradesFinal[0]['muchOfAllGrades'],5))+" do "+str(round(AllGradesToCompare[0]['sumOfAllGrades']/AllGradesToCompare[0]['muchOfAllGrades'],5))
+    average = "Nasza średnia spadła z "+str(averageOld)+" do "+str(averageNew)
+    
+print(average)
 
 url = config['discord_webhook']
 
