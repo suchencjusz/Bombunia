@@ -23,7 +23,7 @@ Wystarczy zrobić forka repozytorium i stworzyć pull requesta C:
 ```
 git clone https://github.com/suchencjusz/Bombunia
 cd Bombunia
-pip -r requirements.txt
+pip install -r requirements.txt
 python setup.py
 ```
 
