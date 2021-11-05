@@ -6,6 +6,8 @@ wysyła je na serwer discord
 
 Projekt ciągle rozwijany, aktualnie jego kod jest co najmniej *żenujący*
 
+- [Bombunia.jpg](https://i.ibb.co/QDTjhGV/Bombunia.jpg)
+
 ## TODO:
 - [x] Ogarnięcie samego działania programu (działa jakby chciał a nie mógł),
 - [ ] Stworzenie pliku konfiguracyjnego ```setup.py```,
