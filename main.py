@@ -9,6 +9,7 @@ with open('config.json') as f:
     config = json.load(f)
     f.close()
 
+color=""
 debuginfo=""
 grades_path = "grades/"
 parsedCookies = ""
@@ -41,6 +42,32 @@ headers = {
     'Sec-GPC': '1'
 }
 
+def SendToDiscord():
+    url = config['discord_webhook']
+
+    data = {
+        "username" : "Bombunia"
+    }
+
+    data["embeds"] = [
+        {
+            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n",
+            "title" : "Bombunia",
+            "color": color
+        }
+    ] 
+
+    result = requests.post(url, json = data)
+
+    try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    else:
+        print("Payload delivered successfully, code {}.".format(result.status_code))
+
+    #for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
+    #for all params, see https://discordapp.com/developers/docs/resources/channel#embed-object
 
 def HowMuchGrades(subject):
     sum = 0
@@ -94,13 +121,27 @@ def GettingCookiesToWORK():
         ciasteczko.catch()
         GettingCookiesToWORK()
 
+def MuchPalasColor(paly):
+    if paly == 0:
+        return "65280"
+    if paly < 5 and paly != 0:
+        return "10479618"
+    if paly >= 5 and paly <= 8:
+        return "14072585"
+    if paly >= 9 and paly <= 12:
+        return "16083714"
+    if paly > 12:
+        return "16711680"
+
 def MuchPalas(paly):
     if paly == 0:
         return "(cud) wpadło ich aż **0** :o"
     if paly < 5 and paly != 0:
         return "Tylko tyle??? wpadło ich: **" + str(paly) + "**"
-    if paly >= 5 and paly <= 12:
+    if paly >= 5 and paly <= 8:
         return "No mogło wpaść więcej, wpadło ich: **" + str(paly) + "**"
+    if paly >= 9 and paly <= 12:
+        return "Robi się coraz ciekawiej gagatki, wpadło ich: **" + str(paly) + "**"
     if paly > 12:
         return "Ale z nas to są debile jebane jednak XDDDdd wpadło ich: **" + str(paly) + "**"
 
@@ -213,6 +254,7 @@ for idx,i in enumerate(newgrades):
     toDiscordWebhook=toDiscordWebhook+"\n"
 
 wiadomoscMotywacyjna = "**Ile dzisiaj wpadło pał?** \n" + MuchPalas(sumOfPalas)
+color = MuchPalasColor(sumOfPalas)
 
 print(toDiscordWebhook)
 
@@ -230,26 +272,4 @@ else:
     
 print(average)
 
-url = config['discord_webhook']
-
-#for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
-data = {
-    "username" : "Bombunia"
-}
-
-#for all params, see https://discordapp.com/developers/docs/resources/channel#embed-object
-data["embeds"] = [
-    {
-        "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n",
-        "title" : "Bombunia"
-    }
-] 
-
-result = requests.post(url, json = data)
-
-try:
-    result.raise_for_status()
-except requests.exceptions.HTTPError as err:
-    print(err)
-else:
-    print("Payload delivered successfully, code {}.".format(result.status_code))
+SendToDiscord()

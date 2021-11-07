@@ -141,6 +141,7 @@ cython_debug/
 config.json
 cookies.json
 grades/
+.history/
 
 # EXE
 *.exe
