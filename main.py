@@ -235,7 +235,7 @@ newgrades = []
 for i in range(len(comparinga)):
     tempciak = [None]*6
     for c in range(6):
-        tempciak[c] = abs(int(comparinga[i]['grades'][c]) - int(comparingb[i]['grades'][c]))
+        tempciak[c] = int(comparinga[i]['grades'][c]) - int(comparingb[i]['grades'][c])
     newgrades.append({'subject_name': comparinga[i]['subject_name'],
                       'grades': tempciak}
                      )
