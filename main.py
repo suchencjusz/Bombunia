@@ -15,7 +15,7 @@ debuginfo=""
 grades_path = "grades/"
 parsedCookies = ""
 AllGrades = []
-additional_cookie_data = " idBiezacyUczen=4168; idBiezacyDziennik=1485; idBiezacyDziennikPrzedszkole=0; idBiezacyDziennikWychowankowie=0"
+additional_cookie_data = " idBiezacyUczen=4168; idBiezacyDziennik=1485; idBiezacyDziennikPrzedszkole=0; idBiezacyDziennikWychowankowie=0" # z tym problem jest przy tworzeniu setup.py :/
 url = 'https://uonetplus-uczen.vulcan.net.pl/powiatchrzanowski/009583/Statystyki.mvc/GetOcenyCzastkowe'
 payload = {
     'idOkres': 1045
@@ -35,7 +35,7 @@ headers = {
     'Origin': 'https://uonetplus-uczen.vulcan.net.pl',
     'DNT': '1',
     'Connection': 'keep-alive',
-    'Referer': 'https://uonetplus-uczen.vulcan.net.pl/powiatchrzanowski/009583/Start',
+    'Referer': 'https://uonetplus-uczen.vulcan.net.pl/powiatchrzanowski/009583/Start', # z tym tezz ale mniejszy 
     'Cookie': '',
     'Sec-Fetch-Dest': 'empty',
     'Sec-Fetch-Mode': 'cors',
@@ -52,7 +52,7 @@ def SendToDiscord():
 
     data["embeds"] = [
         {
-            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n",
+            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n"+"_ver: _"+bombunia_ver,
             "title" : "Bombunia",
             "color": color
         }
