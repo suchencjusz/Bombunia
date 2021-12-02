@@ -52,7 +52,7 @@ def SendToDiscord():
 
     data["embeds"] = [
         {
-            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n"+"_ver: _"+bombunia_ver,
+            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n"+"_ver: "+bombunia_ver+" _",
             "title" : "Bombunia",
             "color": color
         }
