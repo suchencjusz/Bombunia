@@ -10,6 +10,7 @@ if discord_webhook_f.lower() == "t":
     discord_webhook = input("Discord webhook URL: ")
 else:
     discord_webhook_f = False
+    discord_webhook = ""
 
 result = {'email': email,
           'password': password,
