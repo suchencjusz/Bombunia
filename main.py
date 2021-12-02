@@ -143,7 +143,7 @@ def MuchPalas(paly):
     if paly >= 9 and paly <= 12:
         return "Robi się coraz ciekawiej gagatki, wpadło ich: **" + str(paly) + "**"
     if paly > 12:
-        return "Ale z nas to są debile jebane jednak XDDDdd wpadło ich: **" + str(paly) + "**"
+        return "Ale z nas to są debile XDDDdd wpadło ich: **" + str(paly) + "**"
 
 GettingCookiesToWORK()
 OpenCookies()
@@ -154,7 +154,7 @@ try:
     dzejson = r.json()
     print("dlugosc json", len(str(dzejson)))
     if len(str(dzejson)) < 500:
-        print("chuj")
+        print("brak uprawnien")
         ciasteczko.catch()
         r = requests.post(url, data=json.dumps(payload),
                           headers=headers) 
