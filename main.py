@@ -9,7 +9,7 @@ with open('config.json') as f:
     config = json.load(f)
     f.close()
 
-bombunia_ver="1.0.0-dev"
+bombunia_ver="1.0.1"
 color=""
 debuginfo=""
 grades_path = "grades/"
@@ -144,7 +144,7 @@ def MuchPalas(paly):
     if paly >= 9 and paly <= 12:
         return "Robi się coraz ciekawiej gagatki, wpadło ich: **" + str(paly) + "**"
     if paly > 12:
-        return "Ale z nas to są debile jebane jednak XDDDdd wpadło ich: **" + str(paly) + "**"
+        return "Ale z nas to są debile XDDDdd wpadło ich: **" + str(paly) + "**"
 
 GettingCookiesToWORK()
 OpenCookies()
