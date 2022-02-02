@@ -1,15 +1,21 @@
+from pyparsing import col
 import requests
 import json
 import tiramisu_getter as ciasteczko
 import datetime
 import time
 import os
+import matplotlib.pyplot as plt
+import base64
+import upload_img as upl
 
 with open('config.json') as f:
     config = json.load(f)
     f.close()
 
-bombunia_ver="1.0.1"
+lacznie="```"
+summed_grades=[0,0,0,0,0,0]
+bombunia_ver="1.0.2"
 color=""
 debuginfo=""
 grades_path = "grades/"
@@ -18,7 +24,7 @@ AllGrades = []
 additional_cookie_data = " idBiezacyUczen=4168; idBiezacyDziennik=1485; idBiezacyDziennikPrzedszkole=0; idBiezacyDziennikWychowankowie=0" # z tym problem jest przy tworzeniu setup.py :/
 url = 'https://uonetplus-uczen.vulcan.net.pl/powiatchrzanowski/009583/Statystyki.mvc/GetOcenyCzastkowe'
 payload = {
-    'idOkres': 1045
+    'idOkres': 1046
 }
 headers = {
     'Host': 'uonetplus-uczen.vulcan.net.pl',
@@ -52,9 +58,33 @@ def SendToDiscord():
 
     data["embeds"] = [
         {
-            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n"+"_ver: "+bombunia_ver+" _",
+            "description" : average+"\n\n"+wiadomoscMotywacyjna+"\n"+"```"+toDiscordWebhook+"```\n"+"**Lacznie wpadlo:**\n"+lacznie+"_ver: "+bombunia_ver+" _\n",
             "title" : "Bombunia",
             "color": color
+        }
+    ] 
+
+    result = requests.post(url, json = data)
+
+    try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    else:
+        print("Payload delivered successfully, code {}.".format(result.status_code))
+
+    linkof =  upl.send()
+    linkof = json.loads(linkof)
+
+    print(linkof["data"]["link"])
+
+    data["embeds"] = [
+        {
+            "image": {
+                "url" : linkof["data"]["link"]
+            },
+            "color": color,
+            "title" : "Wykresik"
         }
     ] 
 
@@ -257,6 +287,71 @@ for idx,i in enumerate(newgrades):
             sumOfPalas=sumOfPalas+y
         toDiscordWebhook=toDiscordWebhook+str(idy+1)+": "+str(y)+" \n"
     toDiscordWebhook=toDiscordWebhook+"\n"
+
+# duplkat kodu powyzej nie chce mi sie tego scalic xd
+for idx,i in enumerate(newgrades):
+    for idy,y in enumerate(i['grades']):
+        summed_grades[idy] = summed_grades[idy] + int(y)
+        print(idy,y)
+    print("\n\n\n\n")
+
+# print summed_grades values
+for key, value in enumerate(summed_grades):
+    lacznie = lacznie + str(key+1) + ": " + str(value) + "\n"
+
+lacznie = lacznie + "```"
+
+print(summed_grades)
+print("summed")
+print(lacznie)
+print("lacznie")
+
+
+#suma jest tera trzeba zrobic wykres xxd
+
+labels = []
+summed_second = []
+any_pie = False
+colors = []
+
+for idx,i in enumerate(summed_grades):
+    if i > 0:
+        labels.append(str(idx+1))
+        summed_second.append(i)
+        any_pie = True
+
+        if idx+1 == 1:
+            colors.append("#d44040")
+
+        if idx+1 == 2:
+            colors.append("#ff774d")
+        
+        if idx+1 == 3:
+            colors.append("#ffb940")
+
+        if idx+1 == 4:
+            colors.append("#a0c331")
+
+        if idx+1 == 5:
+            colors.append("#4cb050")
+
+        if idx+1 == 6:
+            colors.append("#3dbbf5")
+
+
+if any_pie:
+    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+    # labels = '1', '2', '3', '4', '5', '6'
+    sizes = summed_second
+    # explode = (0.1, 0, 0, 0, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, colors=colors, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title("Ocenki", fontdict=None, loc='center', pad=None)
+
+    plt.savefig('zul.png')
 
 wiadomoscMotywacyjna = "**Ile dzisiaj wpadło pał?** \n" + MuchPalas(sumOfPalas)
 color = MuchPalasColor(sumOfPalas)
