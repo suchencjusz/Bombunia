@@ -14,23 +14,23 @@ def get_random_string(length):
     result_str = ''.join(random.choice(letters) for i in range(length))
     return result_str
 
-def send():
-    headers = {"Authorization": f"Client-ID {config['client_imgur']}"}
+def discord_send() -> requests.Response:
+    headers = {"Authorization": f"Client-ID {config['imgur']['client_id']}"}
 
-    api_key = config['api_key_imgur']
+    api_key = config['imgur']['client_secret']
 
     url = "https://api.imgur.com/3/upload.json"
 
-    j1 = requests.post(
+    r = requests.post(
         url, 
         headers = headers,
         data = {
             'key': api_key, 
-            'image': b64encode(open('zul.png', 'rb').read()),
+            'image': b64encode(open('last_stats.png', 'rb').read()),
             'type': 'base64',
-            'name': 'zul.jpg',
+            'name': 'last_stats.jpg',
             'title': f'{get_random_string(10)}'
         }
     )
 
-    return j1.text
+    return r

@@ -145,3 +145,6 @@ grades/
 
 # EXE
 *.exe
+
+# vscode
+.vscode
