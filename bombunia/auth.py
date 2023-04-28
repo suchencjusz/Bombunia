@@ -82,12 +82,12 @@ class VulcanAuth:
                 d.close()
                 return None
 
-            d.find_element_by_class_name("loginButton").click()
+            d.find_element(By.CLASS_NAME, "loginButton").click()
 
-            e = d.find_element_by_name("LoginName")
+            e = d.find_element(By.NAME, "LoginName")
             e.send_keys(self.username)
 
-            e = d.find_element_by_name("Password")
+            e = d.find_element(By.NAME, "Password")
             e.send_keys(self.password)
 
             e.send_keys("\ue007")
