@@ -3,6 +3,7 @@ import logging
 __logger = logging.getLogger("Bombunia")
 __logger.addHandler(logging.NullHandler())
 
+import PIL
 import time
 import requests
 import ujson
@@ -31,42 +32,31 @@ if __name__ == "__main__":
 
     a = Analyzer()
 
-    x = b.init_session()
-    b.close_session()
+    # x = b.init_session()
+    # b.close_session()
 
     
 
-    b.symbol = x["symbol"]
-    b.cookies = x["cookies"]
+    # b.symbol = x["symbol"]
+    # b.cookies = x["cookies"]
 
-    x = b.get_grades(id_okres=1048)
+    # x = b.get_grades(id_okres=1048)
 
-    b.init_grades_folder(x)
+    # b.init_grades_folder(x)
 
-    _grades_now = x
+    _grades_now = b.get_last_grades(file_offset=1)
     _grades_before = b.get_last_grades()
 
-    _difference = b.compare_grades(_grades_now, _grades_before)
+    _difference = b.compare_grades(_grades_now, _grades_before, save_grades_a=False)
 
     # if len(_difference) != 0:
     #     b.save_grades(_grades_now)
 
 
 
-    for d in _difference:
-        print(d['subject_name'], d['grades'])
+    # for d in _difference:
+    #     print(d['subject_name'], d['grades'])
 
     x = a.pie_differences_summary(_difference)
-
-    with open("chart1.png", "wb") as fh:
-        fh.write(base64.b64decode(x))
     
-    # _last_grades_set = b.last_grades_list()
-
-    # chart1 = Analyzer().graph_from_list(_last_grades_set)
-
-    # # save base64 image to png file
-    # with open("chart1.png", "wb") as fh:
-    #     fh.write(base64.b64decode(chart1))
-
-    # print(b.__dict__())
+    x.show()
