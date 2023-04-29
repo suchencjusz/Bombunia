@@ -30,7 +30,6 @@ async def on_ready(event: hikari.StartingEvent) -> None:
         school_url=cfg["vulcan"]["school_url"],
         school_alias=cfg["vulcan"]["school_alias"],
         symbol=cfg["vulcan"]["symbol"],
-        school_pupil_url=cfg["vulcan"]["school_pupil_url"],
     )
 
     bmb = bot.d["bombunia"]
@@ -40,12 +39,16 @@ async def on_ready(event: hikari.StartingEvent) -> None:
 
     bmb.symbol = x["symbol"]
     bmb.cookies = x["cookies"]
-    bmb.school_pupil_url = f"{bmb.school_pupil_url}{bmb.school_alias}/{bmb.symbol}/Statystyki.mvc/GetOcenyCzastkowe"
 
     await bot.update_presence(
         activity=hikari.Activity(name=f"🅱️ Bombunia v{cfg['version']}")
     )
 
+@bot.listen(lightbulb.CommandErrorEvent)
+async def on_error(event: lightbulb.CommandErrorEvent) -> None:
+    if isinstance(event.exception, lightbulb.CommandInvocationError):
+        await event.context.respond(f"Something went wrong during invocation of command `{event.context.command.name}`.", delete_after=5)
+        raise event.exception
 
 if __name__ == "__main__":
     bot.load_extensions_from("./discord_bot")

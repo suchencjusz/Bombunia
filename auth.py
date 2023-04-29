@@ -67,7 +67,7 @@ class VulcanAuth:
 
             try:
                 d.get(self.school_url)
-            except TimeoutError as e:
+            except Exception as e:
                 print(e)
                 d.close()
                 return None

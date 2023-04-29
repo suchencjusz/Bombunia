@@ -62,7 +62,6 @@ class Bombunia:
         self.school_url = school_url
         self.school_alias = school_alias
         self.symbol = symbol
-        self.school_pupil_url = kwargs.get("school_pupil_url", "")
 
         self.auth = VulcanAuth(
             username=self.username,
@@ -128,8 +127,10 @@ class Bombunia:
 
     def get_grades(self, **kwargs) -> list:
         """
-        Gets the grades from the school_pupil_url
+        Gets the grades from the school_url
         """
+
+        _school_pupil_url = f"{self.school_url}{self.symbol}/Statystyki.mvc/GetOcenyCzastkowe"
 
         _grades_now = []
         payload = {
@@ -140,7 +141,7 @@ class Bombunia:
 
         try:
             r = requests.post(
-                self.school_pupil_url,
+                _school_pupil_url,
                 cookies=self.cookies,
                 data=ujson.dumps(payload),
                 headers=self._get_header(self.cookies),
@@ -196,6 +197,17 @@ class Bombunia:
         with open(f"{folder_path}/{_number_of_files + 1}.json", "w") as f:
             ujson.dump(grades, f)
 
+    def init_grades_folder(self, grades: list, folder_path: str = "grades") -> None:
+        """
+        Initializes the grades folder, and creates the first file (1.json) if it doesn't exist
+        """
+
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        if len(os.listdir(folder_path)) == 0:
+            self.save_grades(grades, folder_path)
+
     def get_last_grades(
         self, folder_path: str = "grades", file_offset: int = 0
     ) -> list:
@@ -221,31 +233,30 @@ class Bombunia:
         _last_grades = []
 
         for i in range(offset_from, offset_to):
-            _last_grades.append(self.get_last_grades(file_offset=i))
+            _last_grades.append(self.get_last_grades(file_offset=i, folder_path=folder_path))
 
         return _last_grades
 
-    def compare_grades(self, grades_a: list, grades_b: list) -> list:
+    def compare_grades(self, grades_a: list, grades_b: list, save_grades_a: bool = True) -> list:
         """
         Compares two grades lists, subtracts -> a - b
         """
 
-        _differeces = []
+        _differences = []
 
         for idx, subject in enumerate(grades_a[0]["all_grades"]):
             if (
                 subject["subject_name"]
                 == grades_b[0]["all_grades"][idx]["subject_name"]
             ):
-                _diff_grades = []
+                _diff_grades = [a - b for a, b in zip(subject["grades"], grades_b[0]["all_grades"][idx]["grades"])]
 
-                for a, b in zip(
-                    subject["grades"], grades_b[0]["all_grades"][idx]["grades"]
-                ):
-                    _diff_grades.append(a - b)
-
-                _differeces.append(
+                _differences.append(
                     {"subject_name": subject["subject_name"], "grades": _diff_grades}
                 ) if sum(_diff_grades) != 0 else None
 
-        return _differeces
+        if save_grades_a and len(_differences) > 0:
+            self.save_grades(grades_a)
+
+
+        return _differences

@@ -1,0 +1,14 @@
+{
+    "vulcan": {
+        "username": "email",
+        "password": "password",
+        "school_url": "mainlibk",
+        "school_alias": "alias",
+        "symbol": "default"
+    },
+    "discord": {
+        "token": "token",
+        "prefix": "?b"
+    },
+    "version": "2.0.0"
+}

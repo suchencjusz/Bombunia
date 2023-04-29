@@ -46,5 +46,22 @@ class Analyzer:
         io_bytes.seek(0)
 
         return base64.b64encode(io_bytes.read()).decode("ascii")
+    
+    # def pie_differences_summary(self, l):
+    #     _valid = []
+
+    #     todo:!
+
+    #     print(_sizes)  
+
+    #     fig, ax = plt.subplots()
+    #     ax.pie(_sizes, labels=_labels, autopct='%1.1f%%', startangle=90)
+
+    #     io_bytes = io.BytesIO()
+    #     plt.savefig(io_bytes, format="png")
+    #     io_bytes.seek(0)
+
+    #     return base64.b64encode(io_bytes.read()).decode("ascii")
+
 
     # heat map of grades in poniedzialek - piatek model
