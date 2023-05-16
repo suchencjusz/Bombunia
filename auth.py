@@ -82,8 +82,6 @@ class VulcanAuth:
 
             e.send_keys("\ue007")
 
-            sleep(5)
-
             WebDriverWait(d, 10).until(
                 EC.presence_of_element_located(
                     (
@@ -99,13 +97,18 @@ class VulcanAuth:
                 EC.presence_of_element_located((By.XPATH, '//*[@id="ext-element-731"]'))
             ).click()
 
-            self.cookies = self.cookies_to_dict(d.get_cookies())
-
-            self.save_cookies(self.cookies)
+            sleep(10)
 
             kick_out += 1
 
         if kick_out < 3:
+
+            sleep(3)
+
+            self.cookies = self.cookies_to_dict(d.get_cookies())
+
+            self.save_cookies(self.cookies)
+
             return self.cookies
 
         return -1

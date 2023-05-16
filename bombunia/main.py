@@ -3,7 +3,7 @@ import logging
 __logger = logging.getLogger("Bombunia")
 __logger.addHandler(logging.NullHandler())
 
-import PIL
+from PIL import Image
 import time
 import requests
 import ujson
@@ -32,6 +32,41 @@ if __name__ == "__main__":
 
     a = Analyzer()
 
+
+    # _grades_now = b.get_last_grades(file_offset=1)
+    # _grades_before = b.get_last_grades()
+
+    # _difference = b.compare_grades(_grades_before, _grades_now, save_grades_a=False)
+
+    # im = a.pie_differences_summary(_difference)
+    # im.show()
+
+    # for i in _difference:
+    #     print(i["subject_name"], i["grades"])
+
+
+    _x = b.get_all_grades()
+
+    _x = a.graph_from_list(_x)
+
+    _x.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # if len(_difference) != 0:
+    #     b.save_grades(_grades_now)
+
+
     # x = b.init_session()
     # b.close_session()
 
@@ -44,19 +79,8 @@ if __name__ == "__main__":
 
     # b.init_grades_folder(x)
 
-    _grades_now = b.get_last_grades(file_offset=1)
-    _grades_before = b.get_last_grades()
-
-    _difference = b.compare_grades(_grades_now, _grades_before, save_grades_a=False)
-
-    # if len(_difference) != 0:
-    #     b.save_grades(_grades_now)
-
-
-
     # for d in _difference:
     #     print(d['subject_name'], d['grades'])
 
-    x = a.pie_differences_summary(_difference)
+   
     
-    x.show()
