@@ -1,14 +1,20 @@
 {
     "vulcan": {
-        "username": "email",
-        "password": "password",
-        "school_url": "mainlibk",
-        "school_alias": "alias",
-        "symbol": "default"
+        "username": "VULCAN username",
+        "password": "VULCAN password",
+        "school_url": "https:\/\/uonetplus.vulcan.net.pl\/",
+        "school_alias": "default",
+        "symbol": "default",
+        "id_okres": 1048
     },
     "discord": {
-        "token": "token",
+        "token": "discord bot token",
         "prefix": "?b"
+    },
+    "mongodb": {
+        "url": "mongo uri",
+        "db_name": "bombunia_dev",
+        "collection_name": "oceny"
     },
     "version": "2.0.0"
 }

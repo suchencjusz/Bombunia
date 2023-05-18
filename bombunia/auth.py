@@ -4,13 +4,13 @@ import os
 
 from time import sleep
 
-from drive_manager import WebDriverManager
-from utils import load_cfg, save_cfg
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from .drive_manager import WebDriverManager
+from utils import load_cfg, save_cfg
 
 cfg = load_cfg()
 

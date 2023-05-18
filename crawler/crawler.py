@@ -1,12 +1,9 @@
-from bombunia_manager import Bombunia
-from auth import VulcanAuth
+from pymongo import MongoClient
+
+from bombunia.bombunia_manager import Bombunia
 from utils import load_cfg
 
 cfg = load_cfg()
-
-from pymongo import MongoClient
-from datetime import datetime, timedelta
-
 
 class Crawler:
     def __init__(self):
@@ -32,20 +29,13 @@ class Crawler:
 
         self.bombunia.mongodb = db
 
-        last_grades = self.bombunia.get_last_grades_from_db()
+        last_grades = self.bombunia.get_last_grades_from_db(db)
 
         _diff = self.bombunia.compare_grades(new_grades, last_grades)
 
-        print()
         print("DIFF")
         print(_diff)
 
-        if _diff != None and _diff != -1:
+        if _diff != None and _diff != []:
             self.bombunia.save_grades(new_grades)
             print("saved!")
-
-
-if __name__ == "__main__":
-    crw = Crawler()
-
-    crw.crawl_grades()
