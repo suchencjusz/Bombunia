@@ -2,6 +2,7 @@ import pydantic
 import datetime
 
 from api.database.db import DB
+from utils import datetime_input_checker_n_parser
 
 from fastapi import APIRouter, Response
 from fastapi.encoders import jsonable_encoder
@@ -21,44 +22,12 @@ pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 router = APIRouter(prefix="/api")
 
 
-# @router.post("/leading")
-# def get_leading_offerts(
-#         offset: int = 0,
-#         limit: int = 20,
-#         sorting: Sorting | None = None,
-#         filters: Filtering | None = None):
-#     return DB.get_leading_offerts(offset, limit, sorting)
-
-
-# @ router.get("/detailed/{offert_id}")
-# def get_detailed_offert(offert_id: str):
-#     return DB.get_detailed_offert(offert_id)
-
-
-# @ router.get("/count")
-# def get_offerts_count():
-#     return {"count": DB.get_offerts_count()}
-
-
 @cache()
 async def get_cache():
     return 1
 
 
-@router.get("/raw/last")
-@cache(expire=60)
-async def get_last_grades():
-    """
-    Returns the last grades from the database
-
-    Should be used for debugging purposes only!    
-    """
-
-    return UJSONResponse(content=jsonable_encoder(DB.get_last_grades_from_db()))
-
-
 @router.get("/difference/today")
-@cache(expire=60)
 async def get_difference_today():
     """
     Returns the difference between yesterday's grades and today's grades
@@ -73,7 +42,7 @@ async def get_difference_today():
 
 
 @router.get("/difference/day/{date}")
-@cache(expire=60)
+@cache(expire=300)
 async def get_difference_date(date: str):
     """
     Returns the difference between yesterday's grades and today's grades
@@ -83,16 +52,23 @@ async def get_difference_date(date: str):
     For example: 2021-10-02 compares grades from 2021-10-01 with grades from 2021-10-02
     """
 
+    date = datetime_input_checker_n_parser(date)
+
+    if date["failed"]:
+        return UJSONResponse(status_code=400, content=jsonable_encoder(date))
+
+    date = date["status"]
+
     r = DB.get_difference_from_date(date)
 
-    if r == None or len(r) == 0:
+    if r == None:
         return Response(status_code=204)
 
     return UJSONResponse(content=jsonable_encoder(r))
 
 
 @router.get("/difference/week/{date}")
-@cache(expire=60)
+@cache(expire=300)
 async def get_difference_week(date: str):
     """
     Returns the difference between today-7 days grades
@@ -101,8 +77,13 @@ async def get_difference_week(date: str):
 
     For example: 2021-10-02 compares grades from 2021-09-25 with grades from 2021-10-02
     """
+    date = datetime_input_checker_n_parser(date)
 
-    date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    if date["failed"]:
+        return UJSONResponse(status_code=400, content=jsonable_encoder(date))
+
+    date = date["status"]
+
     date = date - datetime.timedelta(days=7)
 
     r = []
@@ -110,7 +91,7 @@ async def get_difference_week(date: str):
     for i in range(7):
         date = date + datetime.timedelta(days=1)
 
-        x = DB.get_difference_from_date(date.strftime("%Y-%m-%d"))
+        x = DB.get_difference_from_date(date)
 
         if x != None:
             r.append({"date": date.strftime("%Y-%m-%d"), "nd": i, "grades": x})
@@ -134,7 +115,13 @@ async def get_difference_month(date: str):
     (long execution time xdxdxd)
     """
 
-    date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    date = datetime_input_checker_n_parser(date)
+
+    if date["failed"]:
+        return UJSONResponse(status_code=400, content=jsonable_encoder(date))
+
+    date = date["status"]
+
     date = date - datetime.timedelta(days=30)
 
     r = []
@@ -142,14 +129,56 @@ async def get_difference_month(date: str):
     for i in range(30):
         date = date + datetime.timedelta(days=1)
 
-        x = DB.get_difference_from_date(date.strftime("%Y-%m-%d"))
+        x = DB.get_difference_from_date(date)
 
         if x != None:
             r.append({"date": date.strftime("%Y-%m-%d"), "nd": i, "grades": x})
         else:
             continue
 
-    if r == None or len(r) == 0:
+    if r == None or r == []:
+        return Response(status_code=204)
+
+    return UJSONResponse(content=jsonable_encoder(r))
+
+
+# @router.get("/difference_a/from/{date_from}/{date_to}")
+# @cache(expire=300)
+# async def get_difference_a(date_from: str, date_to: str):
+#     """
+#     Returns the difference between two dates
+
+#     Date format: YYYY-MM-DD
+
+#     For example: 2021-10-02 compares grades from 2021-10-01 with grades from 2021-10-02
+#     """
+
+#     date_from = datetime_input_checker_n_parser(date_from)
+#     date_to = datetime_input_checker_n_parser(date_to)
+
+#     if date_from["failed"] or date_to["failed"]:
+#         return UJSONResponse(status_code=400, content=jsonable_encoder(date_from)) # !!!
+
+#     r = DB.get_difference_from_month_aggregation(date_from, date_to)
+
+#     if r == None or len(r) == 0:
+#         return Response(status_code=204)
+
+#     return UJSONResponse(content=jsonable_encoder(r))
+
+
+@router.get("/average/all")
+@cache(expire=300)
+async def get_average_all():
+    """
+    Returns the average grade for each day of the month
+
+    c - is count of grades
+    """
+
+    r = DB.get_average_all()
+
+    if r == None or r == []:
         return Response(status_code=204)
 
     return UJSONResponse(content=jsonable_encoder(r))

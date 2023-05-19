@@ -1,7 +1,5 @@
 import ujson
-import random
-import string
-from base64 import b64encode
+import datetime
 
 HEADERS = {
     "Host": "uonetplus-uczen.vulcan.net.pl",
@@ -38,10 +36,13 @@ def save_cfg(cfg=load_cfg()):
         f.close()
 
 
-config = load_cfg()
+def datetime_input_checker_n_parser(date: str) -> dict:
+    try:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    except:
+        return {"failed": True, "status": "invalid date format"}
 
+    if date.date() > datetime.datetime.today().date():
+        return {"failed": True, "status": "do not check the future >:c !!!"}
 
-def create_random_string(length):
-    letters = string.ascii_lowercase
-    result_str = "".join(random.choice(letters) for i in range(length))
-    return result_str
+    return {"failed": False, "status": date}

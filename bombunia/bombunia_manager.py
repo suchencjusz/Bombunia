@@ -149,7 +149,6 @@ class Bombunia:
                 headers=self._get_header(self.cookies),
             )
         except Exception as e:
-            # __logger.error(e)
             print(e)
             return -1
 
@@ -189,34 +188,11 @@ class Bombunia:
     def save_grades(self, grades: list) -> None:
         self.mongodb.insert_one(grades)
 
-    # def save_grades(self, grades: list, folder_path: str = "grades") -> None:
-    #     """
-    #     Saves the grades dict to a folder (with last grades file number + 1)
-    #     """
-
-    #     _number_of_files = len(os.listdir(folder_path))
-
-    #     with open(f"{folder_path}/{_number_of_files + 1}.json", "w") as f:
-    #         ujson.dump(grades, f)
-
-    # def init_grades_folder(self, grades: list, folder_path: str = "grades") -> None:
-    #     """
-    #     Initializes the grades folder, and creates the first file (1.json) if it doesn't exist
-    #     """
-
-    #     if not os.path.exists(folder_path):
-    #         os.makedirs(folder_path)
-
-    #     if len(os.listdir(folder_path)) == 0:
-    #         self.save_grades(grades, folder_path)
-
     @staticmethod
     def get_last_grades_from_db(_db: MongoClient) -> list:
         """
         Gets the last grades from the database
         """
-
-        # _db = self.mongodb if _db == None else _db
 
         _r = _db.find_one(sort=[("time", -1)])
 
@@ -227,10 +203,6 @@ class Bombunia:
         """
         Gets every grade record from the database
         """
-
-        # _db = self.mongodb if _db == None else _db
-
-        # _r = _db.find_many({}).sort({"date":1})
         _r = _db.find_many().sort("time", 1)
 
         return _r
@@ -264,14 +236,9 @@ class Bombunia:
         return difference
 
     @staticmethod
-    def get_difference_from_date(_db: MongoClient, date: str) -> list:
-        date = datetime.datetime.strptime(date, "%Y-%m-%d")
-
-        # date = date.replace(hour=0, minute=0, second=0, microsecond=0)
-
+    def get_difference_from_date(_db: MongoClient, date: datetime) -> list:
         yesterday_grades = _db.find_one({"time": {"$lt": date}}, sort=[("time", -1)])
 
-        # date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
         date = date + datetime.timedelta(days=1)
 
         newest_grades = _db.find_one({"time": {"$lt": date}}, sort=[("time", -1)])
@@ -281,7 +248,7 @@ class Bombunia:
 
         difference = Bombunia.compare_grades(newest_grades, yesterday_grades)
 
-        if len(difference) == 0:
+        if difference == [] or difference == None:
             return None
 
         difference.append(
@@ -293,37 +260,87 @@ class Bombunia:
 
         return difference
 
-    # def last_grades_list(
-    #     self, folder_path: str = "grades", offset_from: int = 1, offset_to: int = 5
+    # @staticmethod
+    # def get_difference_from_month_aggregation(
+    #     _db: MongoClient, data_a: datetime, data_b: datetime
     # ) -> list:
-    #     """
-    #     Gets the last five grades from the folder
-    #     """
+    #     all_a = []
+    #     all_b = []
 
-    #     _last_grades = []
+    #     dt = _db.aggregate(
+    #         [
+    #             {"$match": {"time": {"$gte": data_a, "$lt": data_b}}},
+    #             {
+    #                 "$group": {
+    #                     "_id": {
+    #                         "year": {"$year": "$time"},
+    #                         "month": {"$month": "$time"},
+    #                         "day": {"$dayOfMonth": "$time"},
+    #                     },
+    #                     "oldestValue": {"$min": "$value"},
+    #                     "all_grades": {"$push": "$all_grades"},
+    #                 }
+    #             },
+    #             {
+    #                 "$project": {
+    #                     "date": {
+    #                         "$dateFromParts": {
+    #                             "year": "$_id.year",
+    #                             "month": "$_id.month",
+    #                             "day": "$_id.day",
+    #                         }
+    #                     },
+    #                     "oldestValue": 1,
+    #                     "all_grades": 1,
+    #                     "_id": 0,
+    #                 }
+    #             },
+    #         ]
+    #     )
 
-    #     for i in range(offset_from, offset_to):
-    #         _last_grades.append(self.get_last_grades(file_offset=i, folder_path=folder_path))
+    #     for i in dt:
+    #         x = len(i["all_grades"]) - 1
 
-    #     return _last_grades
+    #         d = i
+    #         d["all_grades"][0] = i["all_grades"][x]
 
-    # def get_all_grades(self, folder_path: str = "grades") -> list:
-    #     """
-    #     Gets all grades from the folder
-    #     """
+    #         all_a.append(d)
 
-    #     _all_grades = []
+    #     print(all_a)
 
-    #     for i in range(0, len(os.listdir(folder_path))):
-    #         _all_grades.append(self.get_last_grades(file_offset=i, folder_path=folder_path))
+    #     all_b[0] = all_a[0]
+    #     all_b = all_b + all_a[1:]
 
-    #     return _all_grades
+    #     diff = []
+
+    #     for i in zip(all_a, all_b):
+    #         x = Bombunia.compare_grades(i[0], i[1])
+
+    #         print(len(i[0]), len(i[1]))
+
+    #         print(x)
+
+    #         if x != None:
+    #             diff.append(x)
+
+    #     print(diff)
+
+    #     return diff
 
     @staticmethod
     def compare_grades(grades_a: list, grades_b: list) -> list:
         """
         Compares two grades lists, subtracts -> a - b
         """
+
+        try:
+            x = grades_a["all_grades"]
+            x = grades_b["all_grades"]
+        except TypeError:
+            return
+
+        if grades_a["count_of_all_grades"] <= grades_b["count_of_all_grades"]:
+            return
 
         _differences = []
 
@@ -345,3 +362,31 @@ class Bombunia:
                     )
 
         return _differences
+
+    @staticmethod
+    def get_average_all(_db: MongoClient) -> list:
+        """
+        Gets the average of all grades
+        """
+
+        filter = {}
+        project = {"time": 1, "sum_of_all_grades": 1, "count_of_all_grades": 1}
+        sort = list({"time": 1}.items())
+
+        _r = _db.find(filter=filter, projection=project, sort=sort)
+
+        average = []
+
+        for item in _r:
+            average.append(
+                {
+                    item["time"]: item["sum_of_all_grades"]
+                    / item["count_of_all_grades"],
+                    "c": item["count_of_all_grades"],
+                }
+            )
+
+        # for item in _r:
+        #     average.extend({item["time"]: item["sum_of_all_grades"] / item["count_of_all_grades"]})
+
+        return average

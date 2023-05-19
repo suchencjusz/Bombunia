@@ -1,3 +1,5 @@
+import datetime
+
 from pymongo import MongoClient
 
 from utils import load_cfg
@@ -26,5 +28,11 @@ class DBClient:
     def get_difference_from_today(self) -> list:
         return Bombunia.get_difference_from_today(self.db)
 
-    def get_difference_from_date(self, date: str) -> list:
+    def get_difference_from_date(self, date: datetime) -> list:
         return Bombunia.get_difference_from_date(self.db, date)
+
+    def get_average_all(self) -> list:
+        return Bombunia.get_average_all(self.db)
+
+    # def get_difference_from_month_aggregation(self, date_a: datetime, date_b: datetime) -> list:
+    #     return Bombunia.get_difference_from_month_aggregation(self.db, date_a, date_b)
