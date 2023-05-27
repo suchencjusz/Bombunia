@@ -226,12 +226,12 @@ class Bombunia:
         # difference['checked_time_a'] = yesterday_grades['time']
         # difference['checked_time_b'] = newest_grades['time']
 
-        difference.append(
-            {
-                "checked_time_a": yesterday_grades["time"],
-                "checked_time_b": newest_grades["time"],
-            }
-        )
+        # difference.append(
+        #     {
+        #         "checked_time_a": yesterday_grades["time"],
+        #         "checked_time_b": newest_grades["time"],
+        #     }
+        # )
 
         return difference
 
@@ -251,12 +251,12 @@ class Bombunia:
         if difference == [] or difference == None:
             return None
 
-        difference.append(
-            {
-                "checked_time_a": yesterday_grades["time"],
-                "checked_time_b": newest_grades["time"],
-            }
-        )
+        # difference.append(
+        #     {
+        #         "checked_time_a": yesterday_grades["time"],
+        #         "checked_time_b": newest_grades["time"],
+        #     }
+        # )
 
         return difference
 
@@ -326,6 +326,69 @@ class Bombunia:
     #     print(diff)
 
     #     return diff
+    @staticmethod
+    def get_difference_in_days(date: datetime,d: int, _db: MongoClient):
+        date = date - datetime.timedelta(days=d)
+
+        r = []
+
+        for i in range(7):
+            date = date + datetime.timedelta(days=1)
+
+            x = Bombunia.get_difference_from_date(_db, date)
+
+            if x != None:
+                r.append({"date": date.strftime("%Y-%m-%d"), "nd": i, "grades": x})
+            else:
+                continue
+
+        return r
+
+    @staticmethod
+
+    # def generate_heatmap(compared_grades, subject=None):
+    #     x = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    #     y = []
+
+    #     # Find the range of dates in compared_grades
+    #     min_date = None
+    #     max_date = None
+    #     for grade in compared_grades:
+    #         date = datetime.datetime.strptime(grade["date"], "%Y-%m-%d")
+    #         if min_date is None or date < min_date:
+    #             min_date = date
+    #         if max_date is None or date > max_date:
+    #             max_date = date
+
+    #     # Calculate the number of days between min_date and max_date
+    #     num_days = (max_date - min_date).days + 1
+
+    #     # Return blank array if no days provided
+    #     if num_days == 0:
+    #         return []
+
+    #     # Initialize the heatmap with zeros
+    #     heatmap = [[0] * num_days for _ in range(7)]
+
+    #     for grade in compared_grades:
+    #         date = datetime.datetime.strptime(grade["date"], "%Y-%m-%d")
+    #         day = (date - min_date).days
+
+    #         for g in grade["grades"]:
+    #             if g["subject_name"] == subject or subject is None:
+    #                 for idx, grd in enumerate(g["grades"]):
+    #                     heatmap[day][idx] += grd
+
+    #         y.append(date.strftime("%Y-%m-%d"))
+
+    #     print(y)
+    #     print(x)
+    #     print()
+
+    #     for i in range(len(x)):
+    #         print(x[i], heatmap[i])
+
+    #     return heatmap
 
     @staticmethod
     def compare_grades(grades_a: list, grades_b: list) -> list:

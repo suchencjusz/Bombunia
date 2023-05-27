@@ -117,7 +117,16 @@ class VulcanAuth:
                 )
             ).click()
 
-            sleep(3)
+            sleep(5)
+
+            # WebDriverWait(d, 10).until(
+            #     EC.presence_of_element_located(
+            #         (
+            #             By.XPATH,
+            #             '//*[@id="ext-element-733"]',
+            #         )
+            #     )
+            # ).click()
 
             self.cookies = self.cookies_to_dict(d.get_cookies())
 

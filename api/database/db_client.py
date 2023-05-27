@@ -33,6 +33,7 @@ class DBClient:
 
     def get_average_all(self) -> list:
         return Bombunia.get_average_all(self.db)
+        
 
     # def get_difference_from_month_aggregation(self, date_a: datetime, date_b: datetime) -> list:
     #     return Bombunia.get_difference_from_month_aggregation(self.db, date_a, date_b)

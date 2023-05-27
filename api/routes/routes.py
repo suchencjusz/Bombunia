@@ -3,6 +3,7 @@ import datetime
 
 from api.database.db import DB
 from utils import datetime_input_checker_n_parser
+from bombunia import bombunia_manager as bmb
 
 from fastapi import APIRouter, Response
 from fastapi.encoders import jsonable_encoder
@@ -84,21 +85,9 @@ async def get_difference_week(date: str):
 
     date = date["status"]
 
-    date = date - datetime.timedelta(days=7)
+    r = bmb.Bombunia.get_difference_in_days(date, 7, _db=DB.db)
 
-    r = []
-
-    for i in range(7):
-        date = date + datetime.timedelta(days=1)
-
-        x = DB.get_difference_from_date(date)
-
-        if x != None:
-            r.append({"date": date.strftime("%Y-%m-%d"), "nd": i, "grades": x})
-        else:
-            continue
-
-    if r == None or len(r) == 0:
+    if r == None or r == []:
         return Response(status_code=204)
 
     return UJSONResponse(content=jsonable_encoder(r))
@@ -122,25 +111,40 @@ async def get_difference_month(date: str):
 
     date = date["status"]
 
-    date = date - datetime.timedelta(days=30)
-
-    r = []
-
-    for i in range(30):
-        date = date + datetime.timedelta(days=1)
-
-        x = DB.get_difference_from_date(date)
-
-        if x != None:
-            r.append({"date": date.strftime("%Y-%m-%d"), "nd": i, "grades": x})
-        else:
-            continue
+    r = bmb.Bombunia.get_difference_in_days(date, 30, _db=DB.db)
 
     if r == None or r == []:
         return Response(status_code=204)
 
     return UJSONResponse(content=jsonable_encoder(r))
 
+
+@router.get("/raw/heatmap/week/{date}")
+# @cache(expire=300)
+async def get_raw_heatmap_week(date: str):
+    """
+    Returns the difference between today-7 days grades
+
+    Date format: YYYY-MM-DD
+
+    For example: 2021-10-02 compares grades from 2021-09-25 with grades from 2021-10-02
+    """
+
+    date = datetime_input_checker_n_parser(date)
+
+    if date["failed"]:
+        return UJSONResponse(status_code=400, content=jsonable_encoder(date))
+
+    date = date["status"]
+   
+    r = bmb.Bombunia.get_difference_in_days(date, 7, _db=DB.db)
+
+    if r == None or r == []:
+        return Response(status_code=204)
+
+    bmb.Bombunia.generate_heatmap(r)
+
+    return UJSONResponse(content=jsonable_encoder(r))
 
 # @router.get("/difference_a/from/{date_from}/{date_to}")
 # @cache(expire=300)
