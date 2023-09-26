@@ -31,6 +31,11 @@ class Crawler:
 
         last_grades = self.bombunia.get_last_grades_from_db(db)
 
+        if last_grades == None:
+            self.bombunia.save_grades(new_grades)
+            print("Database initialized!")
+            return
+
         _diff = self.bombunia.compare_grades(new_grades, last_grades)
 
         print("DIFF")
