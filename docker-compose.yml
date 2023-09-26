@@ -1,0 +1,27 @@
+version: "3.6"
+
+services:
+  chrome:
+    image: selenium/standalone-chrome:latest
+    hostname: chrome
+    privileged: true
+    shm_size: 2g
+    ports:
+      - "4444:4444"
+    restart: unless-stopped
+
+  crawler:
+    depends_on:
+      - chrome
+    container_name: crawler
+    volumes:
+      - type: bind
+        source: config.json
+        target: /config.json
+    build:
+      context: .
+      dockerfile: Dockerfile-crawler
+    environment:
+      - DOCKER_CONTAINER=True
+      - LOG_LEVEL=20
+    restart: unless-stopped

@@ -1,56 +1,40 @@
-# from selenium import webdriver
-
-# # from selenium.webdriver.chrome.service import Service as ChromeService
-# # from webdriver_manager.chrome import ChromeDriverManager
-
-# from selenium.webdriver.firefox.service import Service as FirefoxService
-# from webdriver_manager.firefox import GeckoDriverManager
-
-
-# class WebDriverManager:
-#     def __init__(self):
-
-#         options = webdriver.FirefoxOptions()
-#         options.add_argument("--headless")
-
-
-#         self.driver = webdriver.Firefox(
-#             options=options,
-#             service=FirefoxService(GeckoDriverManager().install())
-#         )
-
-#         # options = webdriver.ChromeOptions()
-#         # options.add_argument("--headless")
-#         # options.add_argument("--disable-gpu")
-#         # options.add_argument("--no-sandbox")
-
-#         # self.driver = webdriver.Chrome(
-#         #     options=options, service=ChromeService(ChromeDriverManager().install())
-#         # )
-
-#     def get_driver(self):
-#         return self.driver
-
-#     def close_driver(self):
-#         self.driver.close()
-
+import os
 
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.firefox.options import Options
+
+DOCKER_CONTAINER = os.environ.get("DOCKER_CONTAINER", False)
 
 
 class WebDriverManager:
     def __init__(self):
-        options = Options()
-        options.headless = True
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--start-maximized")
 
-        # self.driver = webdriver.Firefox(
-        #     options=options, service=FirefoxService(GeckoDriverManager().install())
-        # )
+        print("DOCKER_CONTAINER", DOCKER_CONTAINER)
 
-        self.driver = webdriver.Firefox(options=options)
+        if DOCKER_CONTAINER:
+            self.driver = webdriver.Remote(
+                command_executor="http://chrome:4444",
+                options=chrome_options,
+            )
+        else:
+            self.driver = webdriver.Chrome(options=chrome_options)
+
+        self.driver.implicitly_wait(30)
+
+        self.driver = webdriver.Chrome(options=chrome_options)
+
+        # options = Options()
+        # options.headless = True
+
+        # # self.driver = webdriver.Firefox(
+        # #     options=options, service=FirefoxService(GeckoDriverManager().install())
+        # # )
+
+        # self.driver = webdriver.Firefox(options=options)
 
     def get_driver(self):
         return self.driver
