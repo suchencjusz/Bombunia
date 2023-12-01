@@ -23,7 +23,7 @@ fastapi-cache2==0.2.1
 fonttools==4.39.3
 frozenlist==1.3.3
 h11==0.14.0
-hikari==2.0.0.dev118
+hikari==2.0.0.dev122
 hikari-lightbulb==2.3.3
 idna==3.4
 kiwisolver==1.4.4
